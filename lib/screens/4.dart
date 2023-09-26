@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
 
 
 class Fourth extends StatefulWidget {
@@ -14,7 +14,7 @@ class Fourth extends StatefulWidget {
 
 class _Fourth extends State<Fourth> {
 
-  final player = AudioPlayer();                   // Create a player
+  AudioPlayer audioPlayer = AudioPlayer();               // Create a player
 
   @override
   void initState() {
@@ -130,8 +130,9 @@ class _Fourth extends State<Fourth> {
   }
 
   void dasdas () async{
-    await player.setUrl('https://files.catbox.moe/k3wxnt.mp3');
-    player.play();
+    final player = AudioPlayer();
+    await player.play(UrlSource('https://webe.com.br/_uploads/audio/b18fd1933178340ac5ddb9924e4116bd.mp3'));
+
   }
 
 }
