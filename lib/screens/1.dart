@@ -1,9 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:record/record.dart';
+
+import '../web_service/service_response.dart';
 
 class First extends StatefulWidget {
   const First({Key? key}) : super(key: key);
@@ -18,6 +21,9 @@ class _First extends State<First> {
 
   bool isRecording = false;
   String audioPath = '';
+
+
+  final postRequest = PostRequest();
 
   @override
   void initState() {
@@ -38,7 +44,9 @@ class _First extends State<First> {
   Future<void> startRecording() async {
     try {
       if (await audioRecord.hasPermission()) {
-        await audioRecord.start();
+        await audioRecord.start(
+          encoder: AudioEncoder.aacLc,
+          bitRate: 128000,);
         setState(() {
           isRecording = true;
         });
@@ -63,11 +71,29 @@ class _First extends State<First> {
 
   Future<void> playRecording() async {
     try {
-      Source urlSource = UrlSource(audioPath);
+      // Source urlSource = UrlSource(audioPath);
+      //
+      // await audioPlayer.play(urlSource);
 
-      await audioPlayer.play(urlSource);
+      sendAudio(File(audioPath));
     } catch (e) {
       print('deu pau');
+    }
+  }
+
+  Future<void> sendAudio(File audio) async {
+    try {
+      final json = await postRequest.sendPostRequestMultiPart(
+        audio,);
+
+      List<Map<String, dynamic>> _map = [];
+      _map = List<Map<String, dynamic>>.from(jsonDecode(json));
+
+      print('HTTP_RESPONSE: $_map');
+
+
+    } catch (e) {
+      throw Exception('HTTP_ERROR: $e');
     }
   }
 
