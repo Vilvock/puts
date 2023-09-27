@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:record/record.dart';
 
 class First extends StatefulWidget {
   const First({Key? key}) : super(key: key);
@@ -11,6 +13,64 @@ class First extends StatefulWidget {
 }
 
 class _First extends State<First> {
+  late Record audioRecord;
+  late AudioPlayer audioPlayer;
+
+  bool isRecording = false;
+  String audioPath = '';
+
+  @override
+  void initState() {
+    audioPlayer = AudioPlayer();
+    audioRecord = Record();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+
+    audioRecord.dispose();
+    audioPlayer.dispose();
+  }
+
+  Future<void> startRecording() async {
+    try {
+      if (await audioRecord.hasPermission()) {
+        await audioRecord.start();
+        setState(() {
+          isRecording = true;
+        });
+      }
+    } catch (e) {
+      print('deu pau');
+    }
+  }
+
+  Future<void> stopRecording() async {
+    try {
+      String? path = await audioRecord.stop();
+
+      setState(() {
+        isRecording = false;
+        audioPath = path!;
+      });
+    } catch (e) {
+      print('deu pau');
+    }
+  }
+
+  Future<void> playRecording() async {
+    try {
+      Source urlSource = UrlSource(audioPath);
+
+      await audioPlayer.play(urlSource);
+    } catch (e) {
+      print('deu pau');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,88 +93,31 @@ class _First extends State<First> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                          width: double.infinity,
-                          child: Card(
-                              elevation: 0,
-                              color: Colors.white,
-                              margin: EdgeInsets.all(12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Container(
-                                  padding: EdgeInsets.all(20),
-                                  child: Text(
-                                      textAlign: TextAlign.center,
-                                      "Com licença vossa senhoria, o rei Vilvock o brabo a convoca ao seu castelo, é de suma importância que aceite. Qual sua resposta? ")))),
-                      SizedBox(
-                        height: 30,
-                      ),
-                      Container(
-                        color: Colors.white,
-                          child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(20),
-                            child: Icon(
-                              size: 24,
-                              Icons.favorite_border,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Expanded(
-                              child: Container(
-                            child: Wrap(
-                              children: [
-                                GestureDetector(
-                                    onTap: () => {
+                      ElevatedButton(
+                          onPressed: () {
+                            if (isRecording) {
+                              stopRecording();
+                            } else {
+                              startRecording();
+                            }
 
-                                    Navigator.pushNamed(context, "/ui/2")
-                                    },
-                                    child: Text(
-                                      "naum",
-                                      style: TextStyle(
-                                        fontFamily: 'Inter',
-                                        fontSize: 14,
-                                        color: Colors.red,
-                                      ),
-                                    )),
-                              ],
-                            ),
+                          },
+                          child: Container(
+                            height: 40,
+                            width: 70,
+                            color: Colors.black87,
                           )),
-                          Container(
-                            child: VerticalDivider(
-                              color: Colors.white,
-                              width: 2,
-                              thickness: 1.5,
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.all(20),
-                            child: Icon(
-                              color: Colors.white,
-                              size: 24,
-                              Icons.shopping_cart_outlined,
-                            ),
-                          ),
-                          Expanded(
-                              child: Container(
-                                  child: Wrap(children: [
-                            GestureDetector(
-                              onTap: () => {
 
-                              Navigator.pushNamed(context, "/ui/3")
-                              },
-                              child: Text("si",
-                                  style: TextStyle(
-                                    fontFamily: 'Inter',
-                                    fontSize: 14,
-                                    color: Colors.green,
-                                  )),
-                            ),
-                          ])))
-                        ],
-                      ))
+
+                      ElevatedButton(
+                          onPressed: () {
+                            playRecording();
+                          },
+                          child: Container(
+                            height: 40,
+                            width: 70,
+                            color: Colors.blue,
+                          ))
                     ],
                   ))
             ],
